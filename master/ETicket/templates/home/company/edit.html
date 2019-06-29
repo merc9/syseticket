@@ -1,0 +1,66 @@
+{% extends 'base/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<style>
+    #id_companyaddress{
+        height: 195px;
+    }
+
+    .change-font-size{
+        font-size: 20px;
+    }
+</style>
+
+
+
+
+<div class="container">
+    <form action="" class="form" method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col">
+
+                <div class="form-group">
+                    {{form.companyid.error}}
+                    {{form.companyid.label}}
+                    {{form.companyid}}
+                </div>
+                <div class="form-group">
+                    {{form.companyname.error}}
+                    {{form.companyname.label}}
+                    {{form.companyname}}
+                </div>
+                <div class="form-group">
+                    {{form.companyemail.error}}
+                    {{form.companyemail.label}}
+                    {{form.companyemail}}
+                </div>
+                <div class="form-group">
+                    {{form.companyphone.error}}
+                    {{form.companyphone.label}}
+                    {{form.companyphone}}
+                </div>
+
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    {{form.companyphone.error}}
+                    {{form.companyphone.label}}
+                    {{form.companyphone}}
+                </div>
+                <div class="form-group">
+                    {{form.companyaddress.error}}
+                    {{form.companyaddress.label}}
+                    {{form.companyaddress}}
+                </div>
+            </div>
+        </div>
+        <div class="form-group change-font-size">
+            <button class="btn btn-primary change-font-size" type="submit">Guardar</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

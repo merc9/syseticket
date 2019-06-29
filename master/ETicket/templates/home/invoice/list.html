@@ -1,0 +1,219 @@
+{% extends 'base/base.html'%}
+{% load staticfiles %}
+{% load widget_tweaks %}
+{% block content %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){
+
+  $('#invoices').DataTable({
+    searching: false,
+    scrollY: 300,
+    paging: true,
+    lengthMenu: [ 5, 10, 25, 50, 75, 100 ],
+    language: {
+        "decimal": "",
+        "emptyTable": "No hay información",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+        "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+        "infoPostFix": "",
+        "thousands": ",",
+        "lengthMenu": "Mostrar _MENU_ Entradas",
+        "loadingRecords": "Cargando...",
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "zeroRecords": "Sin resultados encontrados",
+        "paginate": {
+            "first": "Primero",
+            "last": "Ultimo",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        }
+     },
+  });
+  $('.dataTables_length').addClass('bs-select');
+
+  $("#searchInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#invoiceTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+
+  $('#reportModal').on('shown.bs.modal', function() {
+    loadModal();
+  });
+
+  $("#toDate").change(function () {
+    var fromDate = document.getElementById("fromDate").value;
+    var toDate = document.getElementById("toDate").value;
+
+    if ( (Date.parse(toDate) < Date.parse(fromDate)) ) {
+        alert("La fecha final no puede ser menor a la de inicio");
+        document.getElementById("toDate").value = "";
+    }
+  });
+
+});
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+function loadModal(){
+    var csrftoken = getCookie('csrftoken');
+    $.ajax({
+            type: "POST",
+            url: '{% url 'home:ajax-get-firstinvoicedate'%}',
+            data: {
+                "csrfmiddlewaretoken": csrftoken,
+            },
+            success: function(result){
+                $("#fromDate").val(result.first_invoicedate);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        });
+}
+
+function generateReport(){
+    fromDate = $("#fromDate").val();
+    toDate = $("#toDate").val();
+    var csrftoken = getCookie('csrftoken');
+    $.ajax({
+            type: "POST",
+            url: '{% url 'home:ajax-generate-report'%}',
+            data: {
+                "csrfmiddlewaretoken": csrftoken,
+                "fromDate":fromDate,
+                "toDate":toDate
+            },
+            success: function(result){
+                window.location.href = result.url;
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        });
+}
+
+
+</script>
+
+{% csrf_token %}
+
+<div class="container">
+    <div aria-hidden="true" aria-labelledby="modalLabel" class="modal fade" id="reportModal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="color: black;">
+                <div class="modal-header">
+                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="modalLabel">Generar reporte</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col">
+                                <label for="fromDate">Desde: </label>
+                                <input class="form-control" id="fromDate" type="date">
+
+                            </div>
+                            <div class="col">
+                                <label for="toDate">Hasta: </label>
+                                <input class="form-control" id="toDate" type="date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="modal_print_button" onclick="generateReport();">Continuar
+                    </button>
+                    <button class="btn btn-secondary" data-dismiss="modal" type="button">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div class="form-group">
+       <div class="row">
+           <div class="col">
+               <input class="form-control" id="searchInput" placeholder="Buscar en tabla..." type="text">
+           </div>
+           <div class="col">
+               <button class="btn btn-primary mr-auto" data-target="#reportModal" data-toggle="modal">
+                   Generar Reporte
+               </button>
+           </div>
+       </div>
+    </div>
+    {% if object_list %}
+    <table id="invoices" class="table table-dark" style="margin-top: 1%;">
+        <thead>
+        <tr>
+            <th>Id Factura</th>
+            <th>Fecha</th>
+            <th>Tarifa</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody id="invoiceTable">
+        {% for instance in object_list %}
+        <tr>
+            <td>{{instance.invoiceid}}</td>
+            <td>{{instance.invoicedate}}</td>
+            <td>{{instance.chosenrate}}</td>
+            <td>{{instance.quantity}}</td>
+            <td>{{instance.total|floatformat:2}}</td>
+            {% if instance.invoiceactive %}
+            <td><label class="text text-success">Procesada</label></td>
+            {% else %}
+            <td><label class="text text-danger">Anulada</label></td>
+            {% endif %}
+            <td>
+                {% if instance.invoiceactive == True %}
+                    <a class="btn btn-primary" href="{{instance.get_absolute_url_print}}">Imprimir</a>
+                    <a class="btn btn-info" href="{{instance.get_absolute_url_detail}}">Detalles</a>
+                {% if user.is_superuser %}
+                    <a class="btn btn-danger" href="{{instance.get_abosulte_url_ajax_deactivate}}">Anular</a>
+                {% endif %}
+
+                {% else %}
+                    <a class="btn btn-info" href="{{instance.get_absolute_url_detail}}">Detalles</a>
+                {% endif %}
+            </td>
+        </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-danger" role="alert">
+        <strong>No hay facturas</strong>
+    </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends 'base/base.html'%}
+{% load staticfiles %}
+{% load widget_tweaks %}
+{% block content %}
+<script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+<script>
+$(document).ready(function(){
+  var date = getDate()
+  $("#id_invoicedate").val(date);
+
+   $("#id_tax").focusout(function() {
+    if($("#id_tax").val().trim().length === 0){
+       $("#id_tax").val(0);
+    }
+   });
+});
+
+
+function getDate(){
+    var d = new Date();
+
+    var month = d.getMonth()+1;
+    var day = d.getDate();
+
+    var output = d.getFullYear() + '-' +
+        (month<10 ? '0' : '') + month + '-' +
+        (day<10 ? '0' : '') + day;
+
+    return output;
+}
+
+function calculateTotal(){
+    var price = $("#unit_price").val();
+    var qty = $("#id_quantity").val();
+    var tax1 = (($("#id_tax").val()+100)/100);
+    var tax2 = tax1/100;
+    console.log(tax2);
+    if($("#id_tax").val() == 0){
+        var total = price*qty;
+    }else{
+        var total = (price*tax2)*qty;
+    }
+    $("#id_total").val(total);
+}
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getTime(time_sum){
+    var newtime = new Date(new Date($.now()).getTime() + time_sum*60000);
+    var h = "";
+    var m = "";
+
+    var coeff = 1000 * 60 * 5;
+    var rounded = new Date(Math.round(newtime.getTime() / coeff) * coeff)
+
+    if(rounded.getMinutes().toString().length <= 1){
+      var m = "0"+rounded.getMinutes().toString();
+    } else {
+      var m = rounded.getMinutes().toString();
+    }
+
+    if(newtime.getHours().toString().length <= 1){
+      var h = "0"+newtime.getHours();
+    } else {
+      var h = newtime.getHours().toString();
+    }
+    return h+":"+m;
+}
+
+function getRateprice(){
+        var rateid = $('#id_chosenrate option:selected').val();
+        var csrftoken = getCookie('csrftoken');
+        var date = new Date();
+
+        $.ajax({
+            type: "POST",
+            url: '{% url 'home:ajax-get-rateprice'%}',
+            data: {
+            "csrfmiddlewaretoken": csrftoken,
+            "action":'getRateprice',
+            "rateid": rateid
+            },
+            success: function(result){
+                $("#unit_price").val(result.rateprice);
+                calculateTotal();
+
+                $("#id_inithour").val(getTime(0));
+
+                if(result.ratename == "Ilimitado"){
+                    $("#id_endhour").val("Ilimitado");
+                }
+                else{
+                    //var time = new Date(new Date($.now()).getTime() + result.ratetime*60000)
+                    $("#id_endhour").val(getTime(result.ratetime));
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                //console.log(errorThrown);
+            }
+        });
+}
+
+
+
+
+
+
+</script>
+<style>
+     .change-font-size{
+        font-size: 20px;
+     }
+</style>
+<div class="container">
+    <form method="POST">
+        {% csrf_token %}
+        <input id="unit_price" type="hidden">
+        {{ form.non_field_errors }}
+        <div class="row">
+            <div id="invoice-info" class="col change-font-size">
+                <div class="form-group">
+                    {{form.invoicedate.errors}}
+                    {{form.invoicedate.label}}
+                    {{form.invoicedate}}
+                </div>
+                <div class="form-group">
+                    {{form.chosenrate.errors}}
+                    {{form.chosenrate.label}}
+                    {{form.chosenrate}}
+                </div>
+                <div class="form-group">
+                    {{form.quantity.errors}}
+                    {{form.quantity.label}}
+                    {{form.quantity}}
+
+                </div>
+                <div class="form-group">
+                    {{form.paymenttype.errors}}
+                    {{form.paymenttype.label}}
+                    {{form.paymenttype}}
+
+                </div>
+                <div class="form-group">
+                    {{form.inithour.errors}}
+                    {{form.inithour.label}}
+                    {{form.inithour}}
+
+                </div>
+                <div class="form-group">
+                    {{form.endhour.errors}}
+                    {{form.endhour.label}}
+                    {{form.endhour}}
+                </div>
+            </div>
+            <div id="customer-info" class="col change-font-size">
+                <div class="form-group">
+                    {{form.customerid.errors}}
+                    {{form.customerid.label}}
+                    {{form.customerid}}
+                </div>
+                <div class="form-group">
+                    {{form.customername.errors}}
+                    {{form.customername.label}}
+                    {{form.customername}}
+                </div>
+                <div class="form-group">
+                    {{form.customeremail.errors}}
+                    {{form.customeremail.label}}
+                    {{form.customeremail}}
+                </div>
+                <div class="form-group">
+                    {{form.customerphone.errors}}
+                    {{form.customerphone.label}}
+                    {{form.customerphone}}
+                </div>
+                <div class="form-group">
+                    {{form.customeraddress.errors}}
+                    {{form.customeraddress.label}}
+                    {{form.customeraddress}}
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col">
+                            {{form.tax.errors}}
+                            {{form.tax.label }}
+                            {{form.tax}}
+                        </div>
+                        <div class="col">
+                            {{form.total.errors}}
+                            {{form.total.label }}
+                            {{form.total}}
+                        </div>
+                        <div class="col">
+                            <br>
+                            <button class="btn btn-block btn-sm btn-primary change-font-size" type="submit">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% load staticfiles %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="https://static.codepen.io/assets/favicon/favicon-8ea04875e70c4b0bb41da869e81236e54394d63638a1ef12fa558a4a835f1164.ico"
+          rel="shortcut icon"
+          type="image/x-icon"/>
+    <link color="#111"
+          href="https://static.codepen.io/assets/favicon/logo-pin-f2d2b6d2c61838f7e76325261b7195c27224080bc099486ddd6dccb469b8e8e6.svg"
+          rel="mask-icon"
+          type=""/>
+    <link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+    <link href="/resources/demos/style.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- AGREGAR media="screen" soluciona el problema -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" media="screen"
+          rel="stylesheet">
+    <title>Factura No. {{object.invoiceid}}</title>
+    <style>
+@media print {
+    .no-print{display: none;}
+    #invoice-POS {box-shadow: none; padding: 0mm;}
+}
+
+#invoice-POS {
+  box-shadow: 0 0 1in -0.25in rgba(0, 0, 0, 0.5);
+  padding: 2mm;
+  margin: 0 auto;
+  width: 48mm;
+  background: #FFF;
+}
+#invoice-POS ::selection {
+  background: #f31544;
+  color: #FFF;
+}
+#invoice-POS ::moz-selection {
+  background: #f31544;
+  color: #FFF;
+}
+#invoice-POS h1 {
+  font-size: 1.5em;
+  color: #222;
+}
+#invoice-POS h2 {
+  font-size: .9em;
+}
+#invoice-POS h3 {
+  font-size: 1.2em;
+  font-weight: 300;
+  line-height: 2em;
+}
+#invoice-POS p {
+  font-size: .7em;
+  color: #666;
+  line-height: 1.2em;
+}
+#invoice-POS #top, #invoice-POS #mid, #invoice-POS #bot {
+  /* Targets all id with 'col-' */
+  border-bottom: 1px solid #EEE;
+}
+#invoice-POS #top {
+  min-height: 100px;
+}
+#invoice-POS #mid {
+  min-height: 80px;
+}
+#invoice-POS #bot {
+  min-height: 50px;
+}
+#invoice-POS #top .logo {
+  height: 60px;
+  width: 60px;
+  background: url(http://michaeltruong.ca/images/logo1.png) no-repeat;
+  background-size: 60px 60px;
+}
+#invoice-POS .clientlogo {
+  float: left;
+  height: 60px;
+  width: 60px;
+  background: url(http://michaeltruong.ca/images/client.jpg) no-repeat;
+  background-size: 60px 60px;
+  border-radius: 50px;
+}
+#invoice-POS .info {
+  display: block;
+  margin-left: 0;
+}
+#invoice-POS .title {
+  float: right;
+}
+#invoice-POS .title p {
+  text-align: right;
+}
+#invoice-POS table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#invoice-POS .tabletitle {
+  font-size: .5em;
+  background: #EEE;
+}
+#invoice-POS .service {
+  border-bottom: 1px solid #EEE;
+}
+#invoice-POS .item {
+  width: 24mm;
+}
+#invoice-POS .itemtext {
+  font-size: .5em;
+}
+#invoice-POS #legalcopy {
+  margin-top: 5mm;
+}
+
+    </style>
+    <script type="text/javascript">
+                    $(document).ready(function () {
+                        $('#print').click(function (e) {
+                            e.preventDefault();
+                            var link = $(this).attr('href');
+                            $.get(link);
+                            return false;
+                        });
+                    });
+
+                    function printCopy(){
+                        $('#copy-mark').html("Copia");
+                        window.print();
+                        $('#copy-mark').html("");
+                    }
+
+                    function printModified(){
+                        var current = $("#invoice-info").html();
+                        var new_invoiceid = $('#new_invoiceid_modal').val();
+                        var modified = "<strong>Fecha de emisión: </strong> {{object.invoicedate}} <br><strong>Factura Electrónica N°: </strong>"+ new_invoiceid + "<br><strong>Clave numérica: </strong>{{company.companyelectronicinvoicecode}}<br><strong>Medio de pago: </strong>{{object.paymenttype}}";
+                        $('#invoice-info').html(modified);
+                        window.print();
+                        $('#invoice-info').html(current);
+
+                    }
+
+    </script>
+    <link rel="stylesheet" href="{% static 'css/base/navbar.css'%}">
+
+</head>
+<body>
+
+{% include 'base/includes/navbar.html'%}
+<br>
+<div class="row">
+
+    <div class="no-print">
+        <div aria-hidden="true" aria-labelledby="modalLabel" class="modal fade" id="changeInvoiceIdModal"
+             role="dialog"
+             tabindex="-1">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="modalLabel">Cambiar consecutivo de factura</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="text" for="invoiceid_modal">Consecutivo actual</label>
+                            <input class="form-control" id="invoiceid_modal" readonly type="text"
+                                   value="{{object.invoiceid}}">
+                        </div>
+                        <div class="form-group">
+                            <label class="text" for="new_invoiceid_modal">Cambiar por</label>
+                            <input class="form-control" id="new_invoiceid_modal" type="text">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="modal_print_button" onclick="printModified();">Continuar
+                        </button>
+                        <button class="btn btn-secondary" data-dismiss="modal" type="button">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <br>
+
+    <div id="invoice-POS">
+        <center id="top">
+            <div class="logo"></div>
+            <div class="info">
+                <h2 id="copy-mark"></h2>
+                <h2>{{company.companyname}}</h2>
+            </div><!--End Info-->
+        </center><!--End InvoiceTop-->
+
+        <div id="mid">
+            <div class="info">
+                <p style="word-wrap: break-word;">
+                    <strong>Direccion: </strong>{{company.companyaddress}}</br>
+                    <strong>Cédula: </strong>{{company.companyid}}
+                    <br><strong>Tel: </strong>{{company.companyphone}}
+                </p>
+            </div>
+            <div class="company-info">
+                <p id="invoice-info" style="text-align:left; word-wrap: break-word;">
+                    <strong>Fecha de emisión: </strong> {{object.invoicedate}} <br>
+                    <strong>Factura Electrónica N°: </strong>{{object.invoiceid}}
+                    <br><strong>Clave numérica: </strong>{{company.companyelectronicinvoicecode}}
+                    <br><strong>Medio de pago: </strong>{{object.paymenttype}}
+                </p>
+            </div>
+
+            {% if object.customerid != None and object.customername != None and object.customerphone != None and object.customeraddress != None and object.customeremail != None %}
+            <div class="customer-info">
+                <p id="customer-info" style="text-align:left; word-wrap: break-word;">
+                    <strong>Cedula de cliente: </strong> {{object.customerid}} <br>
+                    <strong>Nombre: </strong>{{object.customername}}
+                    <br><strong>Telefono: </strong>{{object.customerphone}}
+                    <br><strong>Email: </strong>{{object.customeremail}}
+                    <br><strong>Direccion: </strong>{{object.customeraddress}}
+                </p>
+            </div>
+            {% endif %}
+
+
+        </div><!--End Invoice Mid-->
+
+        <div id="bot">
+
+            <div id="table">
+                <table>
+                    <tr class="tabletitle">
+                        <td class="item"><h2>Item</h2></td>
+                        <td class="Hours"><h2>Cantidad</h2></td>
+                        <td class="Rate"><h2>Subtotal</h2></td>
+                    </tr>
+
+                    <tr class="service">
+                        <td class="tableitem"><p class="itemtext">{{object.chosenrate}}</p></td>
+                        <td class="tableitem"><p class="itemtext">{{object.quantity}}</p></td>
+                        <td class="tableitem"><p class="itemtext">{{object.chosenrate.rateprice}}</p></td>
+                    </tr>
+
+
+                    <tr class="tabletitle">
+                        <td></td>
+                        <td class="Rate"><h2>I.V</h2></td>
+                        <td class="payment"><h2>{{object.tax}}</h2></td>
+                    </tr>
+
+                    <tr class="tabletitle">
+                        <td></td>
+                        <td class="Rate"><h2>Total</h2></td>
+                        <td class="payment"><h2>{{object.total|floatformat:2}}</h2></td>
+                    </tr>
+
+                </table>
+            </div><!--End Table-->
+
+        </div><!--End InvoiceBot-->
+        <div class="no-print container">
+            <button class="btn btn-block btn-primary" id="print" onclick="window.print();">Imprimir</button>
+
+
+            <button class="btn btn-block btn-warning" onclick="printCopy();">Imprimir copia</button>
+
+            {% if user.is_superuser %}
+            <button class="btn btn-block btn-danger" data-target="#changeInvoiceIdModal" data-toggle="modal">Imprimir
+                para
+                Hacienda
+            </button>
+            {% endif %}
+        </div>
+    </div><!--End Invoice-->
+
+
+</div>
+
+</body>
+</html>

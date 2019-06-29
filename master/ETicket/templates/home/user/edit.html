@@ -1,0 +1,80 @@
+{% extends 'base/base.html'%}
+{% load staticfiles %}
+{% load widget_tweaks %}
+{% block content %}
+<script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+<script>
+    $(document).ready(function (){
+        var date = new Date().toISOString().slice(0, 10).replace('T', ' ');
+        $("#id_date_joined").val(date)
+    });
+
+
+</script>
+<style>
+     .change-font-size{
+        font-size: 20px;
+     }
+
+
+</style>
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+<div class="container">
+    {% if form.errors %}
+    {% for field in form %}
+    {% for error in field.errors %}
+    <div class="alert alert-danger">
+        <strong>{{ error|escape }}</strong>
+    </div>
+    {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+    <div class="alert alert-danger">
+        <strong>{{ error|escape }}</strong>
+    </div>
+    {% endfor %}
+    {% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="container">
+            <div class="row">
+                <div class="col change-font-size">
+                    <div class="form-group">
+                        {{form.username.error}}
+                        {{form.username.label}}
+                        {{form.username}}
+                    </div>
+                    <div class="form-group">
+                        {{form.email.error}}
+                        {{form.email.label}}
+                        {{form.email}}
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col">
+                                {{form.is_superuser.error}}
+                                {{form.is_superuser.label}}
+                                {{form.is_superuser}}
+                            </div>
+                            <div class="col">
+                                {{form.is_active.error}}
+                                {{form.is_active.label}}
+                                {{form.is_active}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{form.date_joined.error}}
+                        {{form.date_joined.label}}
+                        {{form.date_joined}}
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary change-font-size" type="submit">Guardar</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

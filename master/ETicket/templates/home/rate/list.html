@@ -1,0 +1,75 @@
+{% extends 'base/base.html'%}
+{% load staticfiles %}
+{% load widget_tweaks %}
+{% block content %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+<script>
+$(document).ready(function (){
+$('#rates').DataTable({
+    searching: false,
+    scrollY: 300,
+    paging: true,
+    lengthMenu: [ 5, 10, 25, 50, 75, 100 ],
+    language: {
+        "decimal": "",
+        "emptyTable": "No hay información",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+        "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+        "infoPostFix": "",
+        "thousands": ",",
+        "lengthMenu": "Mostrar _MENU_ Entradas",
+        "loadingRecords": "Cargando...",
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "zeroRecords": "Sin resultados encontrados",
+        "paginate": {
+            "first": "Primero",
+            "last": "Ultimo",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        }
+     },
+  });
+
+  $('.dataTables_length').addClass('bs-select');
+
+});
+</script>
+
+<div class="container">
+    <div class="form-group">
+        <a class="btn btn-info" href="{% url 'home:create-rate'%}">Nueva tarifa</a>
+    </div>
+    {% if object_list %}
+    <table id="rates" class="table table-dark" style="margin-top: 1%;">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th style="text-align: center">Tiempo tarifa</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for instance in object_list %}
+        <tr>
+            <td>{{instance.ratename}}</td>
+            <td>{{instance.rateprice|floatformat:2}}</td>
+            <td style="text-align: center">{{instance.ratetime}} min.</td>
+            <td>
+                <a class="btn btn-primary" href="{{instance.get_absolute_url_edit}}">Editar</a>
+                <a class="btn btn-danger" href="{{instance.get_absolute_url_delete}}">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+        <tbody>
+    </table>
+    {% else %}
+    <p>No hay</p>
+    {% endif %}
+</div>
+{% endblock %}

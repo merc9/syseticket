@@ -1,0 +1,96 @@
+{% extends 'base/base.html'%}
+{% load staticfiles %}
+{% load widget_tweaks %}
+{% block content %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+<script>
+$(document).ready(function (){
+$('#users').DataTable({
+    searching: false,
+    scrollY: 300,
+    paging: true,
+    lengthMenu: [ 5, 10, 25, 50, 75, 100 ],
+    language: {
+        "decimal": "",
+        "emptyTable": "No hay información",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+        "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+        "infoPostFix": "",
+        "thousands": ",",
+        "lengthMenu": "Mostrar _MENU_ Entradas",
+        "loadingRecords": "Cargando...",
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "zeroRecords": "Sin resultados encontrados",
+        "paginate": {
+            "first": "Primero",
+            "last": "Ultimo",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        }
+     },
+  });
+
+  $('.dataTables_length').addClass('bs-select');
+
+});
+</script>
+
+<div class="form-group">
+    <a class="btn btn-info" href="{% url 'home:create-user' %}">Añadir usuario</a>
+</div>
+{% if object_list %}
+<table id="users" class="table table-dark" style="margin-top: 1%;">
+    <thead>
+    <tr>
+        <th>Nombre</th>
+        <th>Rol</th>
+        <th>Fecha ingreso</th>
+        <th>Estatus</th>
+        <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for instance in object_list %}
+    <tr>
+        <td>{{instance.username}}</td>
+
+        {% if instance.is_superuser %}
+        <td>Administrador</td>
+        {% else %}
+        <td>Colaborador</td>
+        {% endif %}
+
+        <td>{{instance.date_joined}}</td>
+
+        {% if instance.is_active %}
+        <td>Activo</td>
+        {% else %}
+        <td>Inactivo</td>
+        {% endif %}
+        <td>
+            <a class="btn btn-primary" href="{{instance.get_absolute_url_edit}}"> Editar</a>
+            <a class="btn btn-warning" href="{{instance.get_absolute_url_change_password}}">Cambiar contraseña</a>
+            {% if user.id != instance.id and user.is_superuser %}
+            <a class="btn btn-danger" href="{{instance.get_absolute_url_delete}}">Eliminar</a>
+            {% endif %}
+        </td>
+    </tr>
+
+    {% endfor %}
+</tbody>
+</table>
+{% else %}
+<div class="alert alert-danger" role="alert">
+        <strong>No hay usuarios registrados</strong>
+    </div>
+{% endif %}
+
+
+<script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+{% load staticfiles %}
+
+
+<script>
+    function returnHome(){
+        window.location.replace("{% url 'home:dashboard'%}");
+    }
+
+</script>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark no-print" style="margin:0px 0;">
+    <img class="navbar-brand rounded-circle logo" onclick="returnHome();" src="{% static 'img/aventuras.ico' %}"
+         style="width: 3%;"/>
+    <button aria-expanded="false" class="navbar-toggler navbar-toggler-right collapsed" data-target="#navb"
+            data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navb" class="navbar-collapse collapse justify-content-end">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home:create-invoice' %}">Nueva factura</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home:list-invoice' %}">Facturas</a>
+            </li>
+            {% if user.is_superuser %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+                    Tarifas
+                </a>
+                <div class="dropdown-menu drop">
+                    <a class="dropdown-item drop-element" href="{% url 'home:create-rate'%}">Nueva Tarifa</a>
+                    <a class="dropdown-item drop-element" href="{% url 'home:list-rate'%}">Mostrar Tarifas</a>
+                </div>
+            </li>
+            {% endif %}
+            {% if user.is_superuser %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+                    Usuarios
+                </a>
+                <div class="dropdown-menu drop">
+                    <a class="dropdown-item drop-element" href="{% url 'home:create-user'%}">Agregar Usuario</a>
+                    <a class="dropdown-item drop-element" href="{% url 'home:list-user'%}">Mostrar Usuarios</a>
+                </div>
+            </li>
+            {% endif %}
+        </ul>
+        <div class="dropdown ml-auto mr-1">
+                <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#">
+                    {{user.username}}
+                </a>
+                <div class="dropdown-menu drop dropdown-menu-right">
+                    {% if user.is_superuser %}
+                        <a class="dropdown-item drop-element" href="{% url 'home:detail-company'%}">Configuración</a>
+                    {% endif %}
+                    <a class="dropdown-item drop-element" href="{% url 'logout'%}">Cerrar Sesion</a>
+                </div>
+        </div>
+    </div>
+</nav>

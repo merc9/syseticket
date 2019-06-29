@@ -1,0 +1,17 @@
+.drop-element{
+    color: white;
+}
+
+.drop-element:hover{
+    background: rgba(240, 173, 78,0.5);
+    color: white;
+
+}
+
+.drop{
+    background: rgba(10,10,10,0.8);
+}
+
+.logo:hover{
+    cursor: pointer;
+}

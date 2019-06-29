@@ -1,0 +1,34 @@
+{% extends 'base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<style>
+    .change-font-size{
+        font-size: 20px;
+    }
+    .text-1{
+        background-color: lightgrey;
+    }
+    .text-2{
+        background-color: white;
+    }
+</style>
+
+<div class="container" style="margin: 0 auto; width: 50%">
+    <div class="card">
+        <img class="card-img-top img-fluid" src="{% static 'img/aventuras.jpg'%}" alt="">
+
+        <div class="card-body change-font-size" style="color:black;">
+            <p class="card-text text-1"><strong>Nombre: </strong>{{object.companyname}}</p>
+            <p class="card-text text-2"><strong>Identificacion: </strong>{{object.companyid}}</p>
+            <p class="card-text text-1"><strong>Telefono: </strong>{{object.companyphone}}</p>
+            <p class="card-text text-2"><strong>Direccion: </strong>{{object.companyaddress}}</p>
+        </div>
+        <div class="card-footer">
+            <a class="btn btn-primary change-font-size" href="{{object.get_absolute_url_edit}}">Editar Datos</a>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

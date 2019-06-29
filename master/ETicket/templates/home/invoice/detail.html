@@ -1,0 +1,64 @@
+{% extends 'base/base.html'%}
+{% load staticfiles %}
+
+{% block content %}
+
+<style>
+    .change-font-size{
+        font-size: 20px;
+    }
+</style>
+
+<div class="container" style="margin: 0 auto; width: 50%">
+    <div class="card">
+        <div class="card-body change-font-size" style="color:black;">
+            <div class="row">
+                <div class="col change-font-size">
+                    <h3><strong>Informacion de factura</strong></h3>
+                    <p class="card-text"><strong>ID: </strong>{{object.invoiceid}}</p>
+                    <p class="card-text"><strong>Fecha: </strong>{{object.invoicedate}}</p>
+                    <p class="card-text"><strong>Hora de inicio: </strong>{{object.inithour}}</p>
+                    <p class="card-text"><strong>Hora de fin: </strong>{{object.endhour}}</p>
+                    <p class="card-text"><strong>Tarifa: </strong>{{object.chosenrate}}</p>
+                    <p class="card-text"><strong>Cantidad: </strong>{{object.quantity}}</p>
+                    {% if object.tax == None %}
+                        <p class="card-text"><strong>I.V: </strong>No aplica</p>
+                    {% else %}
+                        <p class="card-text"><strong>I.V: </strong>{{object.tax}}</p>
+                    {% endif %}
+                    <p class="card-text"><strong>Total: </strong>{{object.total|floatformat:2}}</p>
+                    <p class="card-text"><strong>Forma de pago: </strong>{{object.paymenttype}}</p>
+                </div>
+                <div class="col change-font-size">
+                    <h3><strong>Informacion del cliente</strong></h3>
+                    <p class="card-text"><strong>Cedula: </strong>{{object.customerid}}</p>
+                    <p class="card-text"><strong>Nombre: </strong>{{object.customername}}</p>
+                    <p class="card-text"><strong>Telefono: </strong>{{object.customerphone}}</p>
+                    <p class="card-text"><strong>Correo: </strong>{{object.customeremail}}</p>
+                    <p class="card-text"><strong>Direccion: </strong>{{object.customeraddres}}</p>
+                </div>
+            </div>
+            <br>
+            {% if object.invoiceactive %}
+                <h3>Estado: <strong class="text text-success">Procesada</strong></h3>
+            {% else %}
+                <h3>Estado: <strong class="text text-danger">Anulada</strong></h3>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{{object.invoiceid}}
+{{object.invoicedate}}
+{{object.inithour}}
+{{object.endhour}}
+{{object.chosenrate}}
+{{object.quantity}}
+{{object.tax}}
+{{object.total}}
+{{object.paymenttype}}
+
+
+{{object.invoiceactive}}

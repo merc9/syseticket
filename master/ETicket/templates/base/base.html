@@ -1,0 +1,24 @@
+{% load staticfiles %}
+<html>
+
+<head>
+    <title>{% block title %}Aventuras{% endblock %}</title>
+    {% include 'base/includes/style.html' %}
+</head>
+
+{% include 'base/includes/navbar.html' %}
+<body class="page-md" style="margin: 0;">
+
+<div class="main">
+    <div class="container rgba-container">
+        <br>
+        {% block content %}
+
+        {% endblock %}
+        <br>
+    </div>
+</div>
+{% include 'base/includes/scripts.html' %}
+</body>
+
+</html>

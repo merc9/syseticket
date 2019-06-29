@@ -1,0 +1,56 @@
+
+html,body{
+  color:white;
+  font-family:'Opens Sans',helvetica;
+  height:93%;
+  width:100%;
+  margin: 0px;
+}
+
+#desarrollofrontend{
+    padding: 10px 0px 10px 0px;
+    background: rgba(0,0,0,0.5);
+    color: #00bdff;
+    width: 100%;
+ /* text-align:center;*/
+ font-size:1.3em;
+}
+
+#desarrollofrontend a{
+    padding: 10px;
+    border:none;
+    color: white;
+    color: #00bdff;
+    text-decoration: none;
+
+}
+
+.main{
+    background: url('../../img/playground2.png') no-repeat center;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height: 100%;
+    width: 100% ;
+    /*text-align: center;*/
+
+}
+
+footer {
+  text-align: center;
+  background-color: black;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  color: white;
+}
+
+.rgba-container{
+  background-color: rgba(0,0,0,0.5);
+  margin: 0 auto;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  border-radius: 5px;
+}

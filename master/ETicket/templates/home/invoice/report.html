@@ -1,0 +1,133 @@
+{% extends 'base/base.html' %}
+{% load staticfiles %}
+
+
+
+{% block content %}
+<script src="{% static 'js/jquery-3.3.1.js' %}"></script>
+
+<script>
+
+$(document).ready(function(){
+  var date = new Date().toISOString().slice(0, 10).replace('T', ' ');
+  $("#report-date").html(date);
+});
+
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function generatePDF(){
+        var csrftoken = getCookie('csrftoken');
+        var content = $("#reportContent").html();
+        var date = new Date().toISOString().slice(0, 10).replace('T', ' ');
+        var file_name = 'reporte-'+date+'.pdf'
+    $.ajax({
+            type: "POST",
+            url: '{% url 'home:pdf-report'%}',
+            data: {
+                "csrfmiddlewaretoken": csrftoken,
+                "content": content
+            },
+            success: function (data) {
+                var a = document.createElement('a');
+
+                var binaryData = [];
+                binaryData.push(data);
+                var url = window.URL.createObjectURL(new Blob(binaryData, {type: "application/pdf"}))
+                a.href = url;
+                a.download = file_name;
+                document.body.append(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(errorThrown);
+            }
+        });
+    }
+</script>
+
+{% csrf_token %}
+
+<button type="button" class="btn btn-warning" onclick="generatePDF();">Generar archivo PDF</button>
+<hr>
+{% if object_list %}
+<div id="reportContent" class="container" style="background-color: white; color:black;">
+    <div class="row">
+        <div class="container" style="font-size: 20px;">
+            <p class="text">Fecha de reporte: <strong class="text-primary" id="report-date"></strong></p>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-striped" style="font-size: 20px;">
+            <thead>
+            <tr>
+                <th>Rango de fechas</th>
+                <th>Efectivo</th>
+                <th>Tarjeta</th>
+                <th>Cantidad de facturas</th>
+                <th>Total de facturas</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <p><strong>{{from_date}}</strong> - <strong>{{to_date}}</strong></p>
+                </td>
+                <td>{{total_cash}}</td>
+                <td>{{total_card}}</td>
+                <td>{{invoice_quantity}}</td>
+                <td>{{report_total|floatformat:2}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="container" style="font-size: 20px;">
+            <p class="text">Aproximadamente las facturas con efectivo corresponden a un <strong class="text-primary">{{total_cash_perc}}%</strong>
+                mientras que las facturas con tarjeta corresponden a un <strong class="text-primary">{{total_card_perc}}%</strong></p>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-striped" style="font-size: 20px;">
+            <thead>
+            <tr>
+                <th>Factura No.</th>
+                <th>Fecha</th>
+                <th>Total de factura</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for invoice in object_list %}
+            <tr>
+                <td>{{invoice.invoiceid}}</td>
+                <td>{{invoice.invoicedate}}</td>
+                <td>{{invoice.total|floatformat:2}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-danger" role="alert">
+    <strong>No hay facturas procesadas entre las fechas {{from_date}} y {{to_date}}</strong>
+</div>
+{% endif %}
+
+{% endblock %}
